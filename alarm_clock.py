@@ -1,7 +1,6 @@
 import streamlit as st
 import time
 from datetime import datetime, timedelta
-import pygame
 
 st.set_page_config(
     page_title="Alarm Clock",
@@ -11,9 +10,10 @@ st.set_page_config(
 
 # Function to play alarm sound
 def play_alarm_sound():
-    pygame.mixer.init()
-    pygame.mixer.music.load("sound.wav")  # Ensure you have an alarm_sound.mp3 file
-    pygame.mixer.music.play()
+    st.audio("alarm_sound.mp3", format="audio/mp3", autoplay=True)
+    # pygame.mixer.init()
+    # pygame.mixer.music.load("sound.wav")  # Ensure you have an alarm_sound.mp3 file
+    # pygame.mixer.music.play()
 
 # Sidebar Navigation
 sidebar_selection = st.sidebar.radio("Navigation", ["Home", "Project", "Contact Us", "About Us"])

@@ -2,16 +2,24 @@ import streamlit as st
 import datetime
 import time
 import threading
-import winsound
+# import winsound
+from playsound import playsound
+
 
 # Global variable to track if the alarm is active
 alarm_running = False
 
+# def play_alarm():
+#     for _ in range(5):  # Play sound 5 times
+#         if not alarm_running:
+#             break
+#         winsound.PlaySound("sound.wav", winsound.SND_FILENAME)
+#         time.sleep(1)
 def play_alarm():
     for _ in range(5):  # Play sound 5 times
         if not alarm_running:
             break
-        winsound.PlaySound("sound.wav", winsound.SND_FILENAME)
+        playsound("sound.wav")  # Play the alarm sound
         time.sleep(1)
 
 def alarm(set_alarm_time):

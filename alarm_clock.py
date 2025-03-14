@@ -1,105 +1,73 @@
 import streamlit as st
-import datetime
 import time
-import threading
-# import winsound
-from playsound import playsound
+from datetime import datetime, timedelta
+import pygame
 
+st.set_page_config(
+    page_title="Alarm Clock",
+    page_icon=":alarm_clock:",
+    layout="centered"
+)
 
-# Global variable to track if the alarm is active
-alarm_running = False
+# Function to play alarm sound
+def play_alarm_sound():
+    pygame.mixer.init()
+    pygame.mixer.music.load("sound.wav")  # Ensure you have an alarm_sound.mp3 file
+    pygame.mixer.music.play()
 
-# def play_alarm():
-#     for _ in range(5):  # Play sound 5 times
-#         if not alarm_running:
-#             break
-#         winsound.PlaySound("sound.wav", winsound.SND_FILENAME)
-#         time.sleep(1)
-def play_alarm():
-    for _ in range(5):  # Play sound 5 times
-        if not alarm_running:
-            break
-        playsound("sound.wav")  # Play the alarm sound
-        time.sleep(1)
+# Sidebar Navigation
+sidebar_selection = st.sidebar.radio("Navigation", ["Home", "Project", "Contact Us", "About Us"])
 
-def alarm(set_alarm_time):
-    global alarm_running
-    alarm_running = True
+if sidebar_selection == "Home":
+    st.title("Alarm Clock Project")
+    st.write("Welcome to the Alarm Clock Project")
 
-    while alarm_running:
-        current_time = datetime.datetime.now().strftime("%H:%M:%S")
-        time.sleep(1)
+elif sidebar_selection == "Project":
+    st.title("Alarm Clock Project")
+    st.write("Create a personalized alarm clock with date and sound features using Streamlit.")
 
-        if current_time == set_alarm_time and alarm_running:
-            st.session_state.status = "⏰ Alarm Ringing!"
-            play_alarm()
-            break
+    # Get user input for the alarm date
+    alarm_date = st.date_input("Set alarm date", datetime.today())
 
-    if alarm_running:
-        st.session_state.status = "✅ Alarm Completed"
-    else:
-        st.session_state.status = "🛑 Alarm Stopped"
+    # Set Alarm Time
+    alarm_time = st.time_input("Set Alarm Time", datetime.now().time())
 
-def set_alarm():
-    global alarm_running
+    # Combine the selected date and time
+    alarm_datetime = datetime.combine(alarm_date, alarm_time)
 
-    h = st.session_state.hour.zfill(2)
-    m = st.session_state.minute.zfill(2)
-    s = st.session_state.second.zfill(2)
+    # Set Snooze Duration
+    snooze_duration = st.slider("Snooze Duration (minutes)", 1, 60, 5)
 
-    if not (h.isdigit() and m.isdigit() and s.isdigit()):
-        st.warning("⚠️ Please enter a valid time!")
-        return
+    if st.button("Start Alarm"):
+        st.write(f"Alarm set for {alarm_datetime}")
 
-    set_alarm_time = f"{h}:{m}:{s}"
-    st.session_state.status = f"⏳ Alarm set for {set_alarm_time}"
+        # Wait until the alarm time
+        while datetime.now() < alarm_datetime:
+            time.sleep(1)
 
-    # Start alarm thread
-    alarm_thread = threading.Thread(target=alarm, args=(set_alarm_time,))
-    alarm_thread.daemon = True
-    alarm_thread.start()
+        st.success("⏰ Wake up! It's time!")
+        play_alarm_sound()
 
-def stop_alarm():
-    global alarm_running
-    alarm_running = False
-    st.session_state.status = "🛑 Alarm Stopped"
+        # Snooze logic
+        snooze_time = datetime.now() + timedelta(minutes=snooze_duration)
 
-# Streamlit UI
-st.set_page_config(page_title="Alarm Clock", page_icon="⏰")
-st.title("⏰ Alarm Clock")
+        while True:
+            current_time = datetime.now()
 
-st.markdown("### Set Alarm Time (24-Hour Format)")
+            if current_time >= snooze_time:
+                st.warning("⏳ Snooze time's up!")
+                play_alarm_sound()
+                snooze_time = current_time + timedelta(minutes=snooze_duration)
 
-# Input fields
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.text_input("Hour", key="hour", max_chars=2, placeholder="HH")
-with col2:
-    st.text_input("Minute", key="minute", max_chars=2, placeholder="MM")
-with col3:
-    st.text_input("Second", key="second", max_chars=2, placeholder="SS")
+            time.sleep(1)
 
-# Set and Stop buttons
-col1, col2 = st.columns(2)
-with col1:
-    st.button("✅ Set Alarm", on_click=set_alarm)
-with col2:
-    st.button("🛑 Stop Alarm", on_click=stop_alarm)
+elif sidebar_selection == "Contact Us":
+    st.title("Contact Us")
+    st.write("Made By: Taha Saif")
+    st.write("Email: tahasaif454@gmail.com")
+    st.write("Contact: 0316-3836744")
+    st.write("GitHub: [Tahasaif3](https://github.com/Tahasaif3)")
 
-# Display status
-st.markdown("### Status")
-st.info(st.session_state.get("status", "No Alarm Set"))
-
-# Display current time
-def update_time():
-    while True:
-        st.session_state.current_time = datetime.datetime.now().strftime("%H:%M:%S")
-        time.sleep(1)
-
-if "current_time" not in st.session_state:
-    st.session_state.current_time = datetime.datetime.now().strftime("%H:%M:%S")
-    threading.Thread(target=update_time, daemon=True).start()
-
-st.markdown(f"### Current Time: `{st.session_state.current_time}`")
-
-st.caption("Note: Ensure `sound.wav` is placed in the same directory.")
+elif sidebar_selection == "About Us":
+    st.title("About Us")
+    st.write("Welcome to the Streamlit Alarm Clock project! This application provides a personalized and flexible alarm experience.")
